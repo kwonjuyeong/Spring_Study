@@ -283,12 +283,13 @@ System.out.println("find Member = " + findMember.getName());
 }
 }
 ```
+![main Test](https://github.com/kwonjuyeong/Spring_Study/assets/57522230/238ab6b2-998c-445e-aae7-88abfb3f26c5)
+
 애플리케이션 로직으로 이렇게 테스트 하는 것은 좋은 방법이 아니다. `JUnit 테스트`를 사용하자.
 
 
-
-
 ### 회원 도메인 - 회원 가입 테스트
+(테스트 작성 방법은 필수!!!)
 
 `MemberServiceTest`
 
