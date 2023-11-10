@@ -121,14 +121,208 @@ tasks.named('test') {
 
 
 
+# 3. 회원 도메인 개발
+
+## 회원 엔티티
+
+### 회원 등급
+
+`Grade Enum`
+
+```groovy
+package hello.core.member;
+public enum Grade {
+BASIC,
+VIP
+}
+```
+
+### 회원 엔티티  
+`Member Class`
+
+(Getter, Setter = Generate 기능을 사용하여 쉽게 생성하자)
+
+```groovy
+package hello.core.member;
+
+public class Member {
+
+private Long id;
+private String name;
+private Grade grade;
+
+public Member(Long id, String name, Grade grade) {
+this.id = id;
+this.name = name;
+this.grade = grade;
+}
+
+public Long getId() {
+return id;
+}
+public void setId(Long id) {
+this.id = id;
+}
+public String getName() {
+return name;
+}
+public void setName(String name) {
+this.name = name;
+}
+public Grade getGrade() {
+return grade;
+}
+public void setGrade(Grade grade) {
+this.grade = grade;
+}
+}
+```
+
+### 회원 저장소 인터페이스
+
+`MemberRepository`
+
+```groovy
+public interface MemberRepository {
+void save(Member member);
+Member findById(Long memberId);
+}
+```
+
+### 메모리 회원 저장소 구현체
+
+`MemoryMemberRepository`
+
+```groovy
+package hello.core.member;
+import java.util.HashMap;
+import java.util.Map;
+
+public class MemoryMemberRepository implements MemberRepository {
+
+private static Map<Long, Member> store = new HashMap<>();
+
+@Override
+public void save(Member member) {
+store.put(member.getId(), member);
+}
+
+@Override
+public Member findById(Long memberId) {
+return store.get(memberId);
+}
+
+}
+```
+참고: `HashMap` 은 동시성 이슈가 발생할 수 있다. 이런 경우 `ConcurrentHashMap` 을 사용하자.
 
 
+## 회원 서비스
+
+### 회원 서비스 인터페이스
+
+`MemberService`
+
+```groovy
+package hello.core.member;
+public interface MemberService {
+
+void join(Member member);
+Member findMember(Long memberId);
+
+}
+```
+
+### 회원 서비스 구현체
+
+`MemberServiceImpl`
+
+```groovy
+package hello.core.member;
+
+public class MemberServiceImpl implements MemberService {
+
+private final MemberRepository memberRepository = new MemoryMemberRepository();
+
+public void join(Member member) {
+memberRepository.save(member);
+}
+
+public Member findMember(Long memberId) {
+return memberRepository.findById(memberId);
+}
+}
+```
+
+# 4. 회원 도메인 실행 & 테스트
+
+## 회원 도메인
+
+### 회원 도메인- 회원 가입 main 
+
+`MemberApp`
+
+```groovy
+package hello.core;
+import hello.core.member.Grade;
+import hello.core.member.Member;
+import hello.core.member.MemberService;
+import hello.core.member.MemberServiceImpl;
+
+public class MemberApp {
+public static void main(String[] args) {
+
+MemberService memberService = new MemberServiceImpl();
+
+Member member = new Member(1L, "memberA", Grade.VIP);
+
+memberService.join(member);
+Member findMember = memberService.findMember(1L);
+System.out.println("new member = " + member.getName());
+System.out.println("find Member = " + findMember.getName());
+}
+}
+```
+![main Test](https://github.com/kwonjuyeong/Spring_Study/assets/57522230/238ab6b2-998c-445e-aae7-88abfb3f26c5)
+
+애플리케이션 로직으로 이렇게 테스트 하는 것은 좋은 방법이 아니다. `JUnit 테스트`를 사용하자.
 
 
+### 회원 도메인 - 회원 가입 테스트
+(테스트 작성 방법은 필수!!!)
+
+`MemberServiceTest`
+
+```groovy
+package hello.core.member;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class MemberServiceTest {
+
+MemberService memberService = new MemberServiceImpl();
+
+@Test
+void join() {
+//given
+Member member = new Member(1L, "memberA", Grade.VIP);
+//when
+memberService.join(member);
+Member findMember = memberService.findMember(1L);
+//then
+Assertions.assertThat(member).isEqualTo(findMember);
+}
+}
+```
 
 
-
-
+## 회원 도메인 설계의 문제점
+- 이 코드의 설계상 문제점은 무엇일까요?
+- 다른 저장소로 변경할 때 OCP 원칙을 잘 준수할까요?
+- DIP를 잘 지키고 있을까요?
+- **의존관계가 인터페이스 뿐만 아니라 구현까지 모두 의존하는 문제점이 있음**
+- **주문까지 만들고나서 문제점과 해결 방안을 설명
 
 
 
