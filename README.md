@@ -121,14 +121,138 @@ tasks.named('test') {
 
 
 
+# 3. 회원 도메인 개발
+
+## 회원 엔티티
+
+### 회원 등급
+
+`Grade Enum`
+
+```groovy
+package hello.core.member;
+public enum Grade {
+BASIC,
+VIP
+}
+```
+
+### 회원 엔티티  
+`Member Class`
+
+(Getter, Setter = Generate 기능을 사용하여 쉽게 생성하자)
+
+```groovy
+package hello.core.member;
+
+public class Member {
+
+private Long id;
+private String name;
+private Grade grade;
+
+public Member(Long id, String name, Grade grade) {
+this.id = id;
+this.name = name;
+this.grade = grade;
+}
+
+public Long getId() {
+return id;
+}
+public void setId(Long id) {
+this.id = id;
+}
+public String getName() {
+return name;
+}
+public void setName(String name) {
+this.name = name;
+}
+public Grade getGrade() {
+return grade;
+}
+public void setGrade(Grade grade) {
+this.grade = grade;
+}
+}
+```
+
+### 회원 저장소 인터페이스
+
+`MemberRepository`
+
+```groovy
+public interface MemberRepository {
+void save(Member member);
+Member findById(Long memberId);
+}
+```
+
+### 메모리 회원 저장소 구현체
+
+`MemoryMemberRepository`
+
+```groovy
+package hello.core.member;
+import java.util.HashMap;
+import java.util.Map;
+
+public class MemoryMemberRepository implements MemberRepository {
+
+private static Map<Long, Member> store = new HashMap<>();
+
+@Override
+public void save(Member member) {
+store.put(member.getId(), member);
+}
+
+@Override
+public Member findById(Long memberId) {
+return store.get(memberId);
+}
+
+}
+```
+참고: `HashMap` 은 동시성 이슈가 발생할 수 있다. 이런 경우 `ConcurrentHashMap` 을 사용하자.
 
 
+## 회원 서비스
 
+### 회원 서비스 인터페이스
 
+`MemberService`
 
+```groovy
+package hello.core.member;
+public interface MemberService {
 
+void join(Member member);
+Member findMember(Long memberId);
 
+}
+```
 
+### 회원 서비스 구현체
+
+`MemberServiceImpl`
+
+```groovy
+package hello.core.member;
+
+public class MemberServiceImpl implements MemberService {
+
+private final MemberRepository memberRepository = new MemoryMemberRepository();
+
+public void join(Member member) {
+memberRepository.save(member);
+}
+
+public Member findMember(Long memberId) {
+return memberRepository.findById(memberId);
+}
+}
+```
 
 
 
