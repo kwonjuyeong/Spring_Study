@@ -587,7 +587,8 @@ Assertions.assertThat(order.getDiscountPrice()).isEqualTo(1000);
 }
 }
 ```
-
-
+**단위 테스트가 정말 중요하다.**
+- Spring같은 도움 없이 순수 자바 코드로 테스트를 돌림.
+- 몇천개의 테스트도 몇초만에 빠르게 테스트할 수 있음.
 
 
