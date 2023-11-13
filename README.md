@@ -78,6 +78,8 @@ tasks.named('test') {
 }
 ```
 
+# Chapter 1 예제
+
 # 1. 비즈니스 요구사항과 설계
 
 ## 회원
@@ -590,5 +592,90 @@ Assertions.assertThat(order.getDiscountPrice()).isEqualTo(1000);
 **단위 테스트가 정말 중요하다.**
 - Spring같은 도움 없이 순수 자바 코드로 테스트를 돌림.
 - 몇천개의 테스트도 몇초만에 빠르게 테스트할 수 있음.
+
+
+# Chapter 2 객체 지향 원리 적용
+
+# 1. 새로운 할인 정책 개발
+
+**새로운 할인 정책을 확장해보자.**
+- **악덕 기획자**: 서비스 오픈 직전에 할인 정책을 지금처럼 고정 금액 할인이 아니라 좀 더 합리적인 주문 금액당 할인하는 정률% 할인으로 변경하고 싶어요. 예를 들어서 기존 정책은 VIP가 10000원을 주문하든 20000원을 주문하든 항상 1000원을 할인했는데, 이번에 새로 나온 정책은 10%로 지정해두면 고객이 10000원 주문시 1000원을 할인해주고, 20000원 주문시에 2000원을 할인해주는 거에요!
+- **순진 개발자**: 제가 처음부터 고정 금액 할인은 아니라고 했잖아요.
+- **악덕 기획자**: 애자일 소프트웨어 개발 선언 몰라요? “계획을 따르기보다 변화에 대응하기를”
+- **순진 개발자**: … (하지만 난 유연한 설계가 가능하도록 객체지향 설계 원칙을 준수했지 후후)
+
+**참고**: 애자일 소프트웨어 개발 선언 https://agilemanifesto.org/iso/ko/manifesto.html
+
+- 순진 개발자가 정말 객체지향 설계 원칙을 잘 준수 했는지 확인해보자. 이번에는 주문한 금액의 %를 할인해주는 새로운 정률 할인 정책을 추가하자.
+- 우리는 객체지향 설계를 지켰기 때문에 FixDiscountPolicy(1000원 고정 할인 정책) -> RateDiscountPolicy(할인율 할인 정책)으로 바꿔주면 된다.
+
+
+![RateDiscountPolicy](https://github.com/kwonjuyeong/Spring_Study/assets/57522230/973f09e9-a8b8-4129-9b9b-eb7f2b0738a8)
+
+
+## RateDiscountPolicy 코드 추가
+
+`RateDiscountPolicy`
+
+```groovy
+package hello.core.discount;
+import hello.core.member.Grade;
+import hello.core.member.Member;
+
+public class RateDiscountPolicy implements DiscountPolicy {
+private int discountPercent = 10; //10% 할인
+
+@Override
+public int discount(Member member, int price) {
+if (member.getGrade() == Grade.VIP) {
+return price * discountPercent / 100;
+} else {
+return 0;
+}
+}
+
+}
+```
+
+## 테스트 작성(Cntl + Shift + T 단축키)**
+
+`RateDiscountPolicyTest`
+
+```groovy
+package hello.core.discount;
+
+import hello.core.member.Grade;
+import hello.core.member.Member;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+class RateDiscountPolicyTest {
+    RateDiscountPolicy discountPolicy = new RateDiscountPolicy();
+    @Test
+    @DisplayName("VIP는 10% 할인이 적용되어야 한다.")
+    void vip_o() {
+    //given
+    Member member = new Member(1L, "memberVIP", Grade.VIP);
+    //when
+    int discount = discountPolicy.discount(member, 10000);
+    //then
+    assertThat(discount).isEqualTo(1000);
+    }
+    @Test
+    @DisplayName("VIP가 아니면 할인이 적용되지 않아야 한다.")
+    void vip_x() {
+    //given
+    Member member = new Member(2L, "memberBASIC", Grade.BASIC);
+    //when
+    int discount = discountPolicy.discount(member, 10000);
+    //then
+    assertThat(discount).isEqualTo(0);
+    }
+}
+```
+
+
 
 
