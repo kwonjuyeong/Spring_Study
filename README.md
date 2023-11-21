@@ -728,8 +728,8 @@ private final DiscountPolicy discountPolicy = new RateDiscountPolicy(); //변경
 
 ```groovy
 public class OrderServiceImpl implements OrderService {
-// private final DiscountPolicy discountPolicy = new FixDiscountPolicy(); //기존 할인 정책(고정 할인)
-private final DiscountPolicy discountPolicy = new RateDiscountPolicy(); //변경 할인 정책(비율 할인)
+//private final DiscountPolicy discountPolicy = new RateDiscountPolicy();
+private DiscountPolicy discountPolicy;
 }
 ```
 - 인터페이스에만 의존하도록 설계와 코드를 변경했다.
