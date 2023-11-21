@@ -3,7 +3,6 @@
 # 프로젝트 생성
 
 ## 사전 준비물
-
 - Java 11 설치
 - IDE: IntelliJ 또는 Eclipse 설치
 
@@ -77,7 +76,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 ```
-
+</br></br>
 # Chapter 1 예제
 
 # 1. 비즈니스 요구사항과 설계
@@ -593,7 +592,7 @@ Assertions.assertThat(order.getDiscountPrice()).isEqualTo(1000);
 - Spring같은 도움 없이 순수 자바 코드로 테스트를 돌림.
 - 몇천개의 테스트도 몇초만에 빠르게 테스트할 수 있음.
 
-
+</br></br>
 # Chapter 2 객체 지향 원리 적용
 
 # 1. 새로운 할인 정책 개발
@@ -699,7 +698,7 @@ private final DiscountPolicy discountPolicy = new RateDiscountPolicy(); //변경
 - OCP: 변경하지 않고 확장할 수 있다고 했는데!
     - **지금 코드는 기능을 확장해서 변경하면, 클라이언트 코드에 영향을 준다!** 따라서 **OCP를 위반**한다.
 
-
+</br></br>
 ## 왜? 클라이언트 코드를 변경해야 할까?
 
 ### 기대했던 의존 관계
@@ -714,7 +713,7 @@ private final DiscountPolicy discountPolicy = new RateDiscountPolicy(); //변경
 ![정책 변경](https://github.com/kwonjuyeong/Spring_Study/assets/57522230/d1a8aa83-9d69-457f-84a1-504b7d0c9f52)
 - ***중요!*** : 그래서 'FixDiscountPolicy'를 'RateDiscountPolicy'로 변경하는 순간 'OrderServiceImpl'의 소스 코드도 함께 변경해야 한다. = OCP 위반 
 
-
+</br></br>
 ## 어떻게 문제를 해결할 수 있을까?
 - 클라이언트 코드인 `OrderServiceImpl` 은 `DiscountPolicy` 의 인터페이스 뿐만 아니라 구체 클래스도 함께 의존한다.
 - 그래서 구체 클래스를 변경할 때 클라이언트 코드도 함께 변경해야 한다.
