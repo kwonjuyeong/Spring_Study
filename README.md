@@ -939,7 +939,8 @@ memberService = appConfig.memberService();
 }
 }
 ```
-```java
+
+```groovy
 class OrderServiceTest {
 MemberService memberService;
 OrderService orderService;
@@ -953,7 +954,7 @@ orderService = appConfig.orderService();
 ```
 테스트 코드에서 `@BeforeEach` 는 각 테스트를 실행하기 전에 호출된다.
 
-
+</br></br>
 **정리**
 - AppConfig를 통해서 관심사를 확실하게 분리했다.
 - 배역, 배우를 생각해보자.
