@@ -824,12 +824,13 @@ public Member findMember(Long memberId) {
 - **DIP 완성:** `MemberServiceImpl` 은 `MemberRepository` 인 추상에만 의존하면 된다. 이제 구체 클래스를 몰라도 된다.
 - **관심사의 분리:** 객체를 생성하고 연결하는 역할과 실행하는 역할이 명확히 분리되었다. 
 
+### 회원 객체 인스턴스 다이어그램
 ![회원 객체 인스턴스 다이어그램](https://github.com/kwonjuyeong/Spring_Study/assets/57522230/76462021-e53b-436e-9aaa-d55823b95b7c)
 
 - `appConfig` 객체는 `memoryMemberRepository` 객체를 생성하고 그 참조값을 `memberServiceImpl` 을 생성하면서 생성자로 전달한다.
 - 클라이언트인 `memberServiceImpl` 입장에서 보면 의존관계를 마치 외부에서 주입해주는 것 같다고 해서 DI(Dependency Injection) 우리 말로 의존관계 주입 또는 의존성 주입이라 한다.
 
-
+</br></br>
 ### OrderServiceImpl - 생성자 주입
 
 ```groovy
@@ -875,7 +876,7 @@ public class OrderServiceImpl implements OrderService{
 - `OrderServiceImpl` 은 이제부터 실행에만 집중하면 된다.
 - `OrderServiceImpl` 에는 `MemoryMemberRepository` , `FixDiscountPolicy` 객체의 의존관계가 주입된다.
 
-
+</br></br>
 ## AppConfig 실행
 
 ### 사용 클래스 - MemberApp
