@@ -1193,3 +1193,200 @@ public DiscountPolicy discountPolicy() {
 (DI 컨테이너는 조각들을 레고처럼 조립해주는 역할로 생각하면 된다.)
 
 
+# 9. 스프링으로 전환하기
+- 지금까지 순수한 자바 코드만으로 DI(AppConfig)를 적용했다. 이제 스프링을 사용해보자.
+
+## AppConfig 스프링 기반으로 변경
+
+```groovy
+package hello.core;
+
+import hello.core.discount.DiscountPolicy;
+import hello.core.discount.RateDiscountPolicy;
+import hello.core.member.MemberRepository;
+import hello.core.member.MemberService;
+import hello.core.member.MemberServiceImpl;
+import hello.core.member.MemoryMemberRepository;
+import hello.core.order.OrderService;
+import hello.core.order.OrderServiceImpl;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AppConfig {
+
+@Bean
+public MemberService memberService() {
+    return new MemberServiceImpl(memberRepository());
+}
+
+@Bean
+public OrderService orderService() {
+    return new OrderServiceImpl(memberRepository(),discountPolicy());
+}
+
+@Bean
+public MemberRepository memberRepository() {
+    return new MemoryMemberRepository();
+}
+
+@Bean
+public DiscountPolicy discountPolicy() {
+    return new RateDiscountPolicy();
+}
+}
+```
+- AppConfig에 설정을 구성한다는 뜻의 `@Configuration` 을 붙여준다.
+- 각 메서드에 `@Bean` 을 붙여준다. 이렇게 하면 스프링 컨테이너에 스프링 빈으로 등록한다.
+
+
+## MemberApp에 스프링 컨테이너 적용
+
+```groovy
+package hello.core;
+
+import hello.core.member.Grade;
+import hello.core.member.Member;
+import hello.core.member.MemberService;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class MemberApp {
+public static void main(String[] args) {
+
+    // AppConfig appConfig = new AppConfig();
+    // MemberService memberService = appConfig.memberService();
+
+    ApplicationContext applicationContext = newAnnotationConfigApplicationContext(AppConfig.class);
+    MemberService memberService = applicationContext.getBean("memberService", MemberService.class);
+
+    Member member = new Member(1L, "memberA", Grade.VIP);
+    memberService.join(member);
+
+    Member findMember = memberService.findMember(1L);
+    System.out.println("new member = " + member.getName());
+    System.out.println("find Member = " + findMember.getName());
+    }
+}
+```
+
+
+## OrderApp에 스프링 컨테이너 적용
+
+```groovy
+package hello.core;
+
+import hello.core.member.Grade;
+import hello.core.member.Member;
+import hello.core.member.MemberService;
+import hello.core.order.Order;
+import hello.core.order.OrderService;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class OrderApp {
+public static void main(String[] args) {
+
+    // AppConfig appConfig = new AppConfig();
+    // MemberService memberService = appConfig.memberService();
+    // OrderService orderService = appConfig.orderService();
+
+    ApplicationContext applicationContext = new
+    AnnotationConfigApplicationContext(AppConfig.class);
+    MemberService memberService = applicationContext.getBean("memberService", MemberService.class);
+    OrderService orderService = applicationContext.getBean("orderService",OrderService.class);
+
+    long memberId = 1L;
+    Member member = new Member(memberId, "memberA", Grade.VIP);
+    memberService.join(member);
+
+    Order order = orderService.createOrder(memberId, "itemA", 10000);
+    System.out.println("order = " + order);
+}
+}
+```
+
+### 스프링 컨테이너
+- ApplicationContext` 를 스프링 컨테이너라 한다.
+- 기존에는 개발자가 `AppConfig` 를 사용해서 직접 객체를 생성하고 DI를 했지만, 이제부터는 스프링 컨테이너를 통해서 사용한다.
+- 스프링 컨테이너는 `@Configuration` 이 붙은 `AppConfig` 를 설정(구성) 정보로 사용한다. 여기서 `@Bean` 이라 적힌 메서드를 모두 호출해서 반환된 객체를 스프링 컨테이너에 등록한다. 이렇게 스프링 컨테이너에 등록된 객체를 스프링 빈이라 한다.
+- 스프링 빈은 `@Bean` 이 붙은 메서드의 명을 스프링 빈의 이름으로 사용한다. ( `memberService` ,`orderService` )
+- 이전에는 개발자가 필요한 객체를 `AppConfig` 를 사용해서 직접 조회했지만, 이제부터는 스프링 컨테이너를 통해서 필요한 스프링 빈(객체)를 찾아야 한다. 스프링 빈은 `applicationContext.getBean()` 메서드를 사용해서 찾을 수 있다.
+- 기존에는 개발자가 직접 자바코드로 모든 것을 했다면 이제부터는 스프링 컨테이너에 객체를 스프링 빈으로 등록하고, 스프링 컨테이너에서 스프링 빈을 찾아서 사용하도록 변경되었다.
+- 코드가 약간 더 복잡해진 것 같은데, 스프링 컨테이너를 사용하면 어떤 장점이 있을까?
+
+
+### 스프링 부트 3.1 이상 - 로그 출력 안되는 문제 해결
+`MemberApp` 과 `OrderApp` 을 실행할 때, 스프링 부트 3.1 이상을 사용한다면 로그가 출력되지 않는다.
+
+스프링 부트 3.1 미만**
+```
+19:18:00.439 [main] DEBUG
+org.springframework.context.annotation.AnnotationConfigApplicationContext -
+Refreshing
+org.springframework.context.annotation.AnnotationConfigApplicationContext@7cdbc5
+d3
+19:18:00.445 [main] DEBUG
+org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating
+shared instance of singleton bean
+'org.springframework.context.annotation.internalConfigurationAnnotationProcessor
+'
+19:18:00.503 [main] DEBUG
+org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating
+shared instance of singleton bean
+'org.springframework.context.event.internalEventListenerProcessor'
+19:18:00.504 [main] DEBUG
+org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating
+shared instance of singleton bean
+'org.springframework.context.event.internalEventListenerFactory'
+19:18:00.504 [main] DEBUG
+org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating
+shared instance of singleton bean
+'org.springframework.context.annotation.internalAutowiredAnnotationProcessor'
+19:18:00.505 [main] DEBUG
+org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating
+shared instance of singleton bean
+'org.springframework.context.annotation.internalCommonAnnotationProcessor'
+19:18:00.508 [main] DEBUG
+org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating
+shared instance of singleton bean 'appConfig'
+19:18:00.510 [main] DEBUG
+org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating
+shared instance of singleton bean 'memberService'
+19:18:00.512 [main] DEBUG
+org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating
+shared instance of singleton bean 'memberRepository'
+19:18:00.512 [main] DEBUG
+org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating
+shared instance of singleton bean 'orderService'
+19:18:00.513 [main] DEBUG
+org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating
+shared instance of singleton bean 'discountPolicy'
+new member = memberA
+find Member = memberA
+```
+**스프링 부트 3.1 이상**
+```
+new member = memberA
+find Member = memberA
+```
+이때는 다음 위치에 파일을 만들어서 넣으면 된다.
+
+
+src/main/resources/logback.xml`
+```xml
+<configuration>
+<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+<encoder>
+<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -%kvp-
+%msg%n</pattern>
+</encoder>
+</appender>
+<root level="DEBUG">
+<appender-ref ref="STDOUT" />
+</root>
+</configuration>
+```
+- 스프링 부트 3.1 부터 기본 로그 레벨을 `INFO` 로 빠르게 설정하기 때문에 로그를 확인할 수 없는데, 이렇게하면 기본 로그 레벨을 `DEBUG` 로 설정해서 강의 내용과 같이 로그를 확인할 수 있다.
+- 참고로 이 내용은 `MemberApp` 과 `OrderApp` 처럼 `ApplicationContext` 를 직접 생성해서 사용할 때만 적용된다.
+- 강의 뒤에서 나오는 `CoreApplication` 처럼 스프링 부트를 실행할 때는 이 파일을 제거하거나 또는 `<rootlevel="DEBUG">` 부분을 `<root level="INFO">` 로 변경하면 강의 내용과 같은 로그를 확인할 수 있다.
