@@ -1036,14 +1036,92 @@ public DiscountPolicy discountPolicy() {
 - `new MemoryMemberRepository()` 부분이 중복 제거되었다. 이제 `MemoryMemberRepository` 를 다른 구현체로 변경할 때 한 부분만 변경하면 된다.
 - `AppConfig` 를 보면 역할과 구현 클래스가 한눈에 들어온다. 애플리케이션 전체 구성이 어떻게 되어있는지 빠르게 파악할 수 있다
 
-
-
-
-
 ***참고*** 리팩토링이란?
 [리팩토링이란?](https://ikkison.tistory.com/82)
 
 
+</br></br>
+# 5. 새로운 구조와 할인 정책 적용
+- 정액 할인 정책을 정률(%) 할인 정책으로 변경해보자
+- FixDiscountPolicy -> RateDiscountPolicy
+- 어느 부분을 변경하면 되겠는가?
 
+**AppConfig의 등장으로 애플리케이션이 크게 사용 영역과, 객체를 생성하고 구성(Configuration)하는 영역으로 분리되었다.**
+
+**사용 구성의 분리**
+![image](https://github.com/kwonjuyeong/Spring_Study/assets/57522230/f404fe82-6bdd-4941-a511-1345ac3ff0a5)
+
+**할인 정책의 변경**
+![image](https://github.com/kwonjuyeong/Spring_Study/assets/57522230/3381de4f-f104-4dd6-88c9-8c582b730f58)
+- FixDiscountPolicy` `RateDiscountPolicy` 로 변경해도 구성 영역만 영향을 받고, 사용 영역은 전혀 영향을 받지 않는다.
+
+
+## 할인 정책 변경 구성 코드
+```groovy
+package hello.core;
+import hello.core.discount.DiscountPolicy;
+import hello.core.discount.FixDiscountPolicy;
+import hello.core.discount.RateDiscountPolicy;
+import hello.core.member.MemberRepository;
+import hello.core.member.MemberService;
+import hello.core.member.MemberServiceImpl;
+import hello.core.member.MemoryMemberRepository;
+import hello.core.order.OrderService;
+import hello.core.order.OrderServiceImpl;
+public class AppConfig {
+
+public MemberService memberService() {
+    return new MemberServiceImpl(memberRepository());
+}
+
+public OrderService orderService() {
+    return new OrderServiceImpl(memberRepository(),discountPolicy());
+}
+
+public MemberRepository memberRepository() {
+    return new MemoryMemberRepository();
+}
+
+public DiscountPolicy discountPolicy() {
+    // return new FixDiscountPolicy();
+    return new RateDiscountPolicy();
+}
+
+}
+```
+- `AppConfig` 에서 할인 정책 역할을 담당하는 구현을 `FixDiscountPolicy` `RateDiscountPolicy` 객체로 변경했다.
+- 이제 할인 정책을 변경해도, 애플리케이션의 구성 역할을 담당하는 AppConfig만 변경하면 된다.
+- 클라이언트 코드인 `OrderServiceImpl` 를 포함해서 **사용 영역**의 어떤 코드도 변경할 필요가 없다.
+- **구성 영역**은 당연히 변경된다.
+- 구성 역할을 담당하는 AppConfig를 애플리케이션이라는 공연의 기획자로 생각하자. 공연 기획자는 공연 참여자인 구현 객체들을 모두 알아야 한다.
+
+</br></br>
+# 6. 전체 흐름 정리(Chapter 2)
+
+**새로운 할인 정책 개발**
+- 다형성 덕분에 새로운 정률 할인 정책 코드를 추가로 개발하는 것 자체는 아무 문제가 없음
+
+**새로운 할인 정책 적용과 문제점**
+- 새로 개발한 정률 할인 정책을 적용하려고 하니 **클라이언트 코드**인 주문 서비스 구현체도 함께 변경해야함
+- 주문 서비스 클라이언트가 인터페이스인 `DiscountPolicy` 뿐만 아니라, 구체 클래스인 `FixDiscountPolicy` 도 함께 의존 **DIP 위반**
+
+**관심사의 분리**
+- 애플리케이션을 하나의 공연으로 생각
+- 기존에는 클라이언트가 의존하는 서버 구현 객체를 직접 생성하고, 실행함
+- 비유를 하면 기존에는 남자 주인공 배우가 공연도 하고, 동시에 여자 주인공도 직접 초빙하는 다양한 책임을 가지고 있음
+- 공연을 구성하고, 담당 배우를 섭외하고, 지정하는 책임을 담당하는 별도의 **공연 기획자**가 나올 시점 공연 기획자인 AppConfig가 등장
+- AppConfig는 애플리케이션의 전체 동작 방식을 구성(config)하기 위해, **구현 객체를 생성**하고, **연결**하는 책임
+- 이제부터 클라이언트 객체는 자신의 역할을 실행하는 것만 집중, 권한이 줄어듬(책임이 명확해짐)
+
+**AppConfig 리팩터링**
+- 구성 정보에서 역할과 구현을 명확하게 분리
+- 역할이 잘 드러남
+- 중복 제거
+
+**새로운 구조와 할인 정책 적용**
+- 정액 할인 정책 정률% 할인 정책으로 변경
+- AppConfig의 등장으로 애플리케이션이 크게 **사용 영역**과, 객체를 생성하고 **구성(Configuration)하는 영역**으로 분리
+- 할인 정책을 변경해도 AppConfig가 있는 구성 영역만 변경하면 됨, 사용 영역은 변경할 필요가 없음.
+- 물론 클라이언트 코드인 주문 서비스 코드도 변경하지 않음
 
 
