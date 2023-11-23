@@ -1450,7 +1450,7 @@ ApplicationContext applicationContext = new AnnotationConfigApplicationContext(A
 스프링 컨테이너를 생성하고, 설정(구성) 정보를 참고해서 스프링 빈도 등록하고, 의존관계도 설정했다. 이제 스프링 컨테이너에서 데이터를 조회해보자.
 
 
-
+</br></br>
 # 2. 컨테이너에 등록된 모든 빈 조회
 
 ```groovy
@@ -1504,7 +1504,7 @@ class ApplicationContextInfoTest {
     - `ROLE_APPLICATION` : 일반적으로 사용자가 정의한 빈
     - `ROLE_INFRASTRUCTURE` : 스프링이 내부에서 사용하는 빈
 
-
+</br></br>
 # 3. 스프링 빈 조회 - 기본
 
 **스프링 컨테이너에서 스프링 빈을 찾는 가장 기본적인 조회 방법**
@@ -1561,7 +1561,7 @@ void findBeanByNameX() {
 ```
 참고: 구체 타입으로 조회하면 변경시 유연성이 떨어진다.
 
-
+</br></br>
 # 4. 스프링 빈 조회 - 동일한 타입이 둘 이상
 - 타입으로 조회시 같은 타입의 스프링 빈이 둘 이상이면 오류가 발생한다. 이때는 빈 이름을 지정하자.
 - `ac.getBeansOfType()` 을 사용하면 해당 타입의 모든 빈을 조회할 수 있다.
