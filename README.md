@@ -1874,4 +1874,7 @@ public class BeanDefinitionTest {
 - 가끔 스프링 코드나 스프링 관련 오픈 소스의 코드를 볼 때, BeanDefinition 이라는 것이 보일 때가 있다. 이때 이러한 메커니즘을 떠올리면 된다.
 
 
+# Chapter 5. 싱글톤 컨테이너
+
+# 1. 웹 애플리케이션과 싱글톤
 
