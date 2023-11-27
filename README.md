@@ -96,7 +96,7 @@ tasks.named('test') {
 
 요구사항을 보면 회원 데이터, 할인 정책 같은 부분은 지금 결정하기 어려운 부분이다. 
 그렇다고 이런 정책이 결정될 때까지 개발을 무기한 기다릴 수도 없다. 인터페이스를 만들고 구현체를 언제든지 갈아끼울 수 있도록 설계하면 된다.
-
+</br></br>
 # 2. 회원 도메인 설계
 
 ## 회원 도메인 요구사항
@@ -121,7 +121,7 @@ tasks.named('test') {
 ![회원 객체 다이어그램](https://github.com/kwonjuyeong/Spring_Study/assets/57522230/43dad64b-3b01-4fd2-b152-49fc2171fd23)
 
 
-
+</br></br>
 # 3. 회원 도메인 개발
 
 ## 회원 엔티티
@@ -255,7 +255,7 @@ return memberRepository.findById(memberId);
 }
 }
 ```
-
+</br></br>
 # 4. 회원 도메인 실행 & 테스트
 
 ## 회원 도메인
@@ -326,7 +326,7 @@ Assertions.assertThat(member).isEqualTo(findMember);
 - **의존관계가 인터페이스 뿐만 아니라 구현까지 모두 의존하는 문제점이 있음**
 - **주문까지 만들고나서 문제점과 해결 방안을 설명
 
-
+</br></br>
 # 5. 주문과 할인 도메인 설계
 
 ## 주문과 할인 정책
@@ -367,7 +367,7 @@ Assertions.assertThat(member).isEqualTo(findMember);
 회원을 메모리가 아닌 실제 DB에서 조회하고, 정률 할인 정책(주문 금액에 따라 % 할인)을 지원해도 주문 서비스를 변
 경하지 않아도 된다. 협력 관계를 그대로 재사용 할 수 있다.
 
-
+</br></br>
 # 6. 주문과 할인 도메인 개발
 
 ### 할인 정책 인터페이스
@@ -521,7 +521,7 @@ return new Order(memberId, itemName, itemPrice, discountPrice);
 }
 ```
 
-
+</br></br>
 # 7. 주문과 할인 실행 & 테스트
 
 ## 주문과 할인 정책 실행
@@ -674,7 +674,7 @@ class RateDiscountPolicyTest {
     }
 }
 ```
-
+</br></br>
 # 2. 새로운 할인 정책 적용과 문제점
 
 ### 할인 정책 변경
@@ -739,7 +739,7 @@ private DiscountPolicy discountPolicy;
 이 문제를 해결하려면 누군가가 클라이언트인 `OrderServiceImpl` 에 `DiscountPolicy` 의 구현 객체를 대
 신 생성하고 주입해주어야 한다.
 
-
+</br></br>
 # 3. 관심사의 분리
 
 - 애플리케이션을 하나의 공연이라 생각해보자. 각각의 인터페이스를 배역(배우 역할)이라 생각하자. 그런데! 실제 배역 맞는 배우를 선택하는 것은 누가 하는가?
@@ -964,7 +964,7 @@ orderService = appConfig.orderService();
 - 이제 각 배우들은 담당 기능을 실행하는 책임만 지면 된다.
 - `OrderServiceImpl` 은 기능을 실행하는 책임만 지면 된다.
 
-
+</br></br>
 # 4. AppConfig 리팩토링
 - 현재 AppConfig를 보면 **중복**이 있고, **역할**에 따른 **구현**이 잘 안보인다.
 
@@ -1124,7 +1124,7 @@ public DiscountPolicy discountPolicy() {
 - 할인 정책을 변경해도 AppConfig가 있는 구성 영역만 변경하면 됨, 사용 영역은 변경할 필요가 없음.
 - 물론 클라이언트 코드인 주문 서비스 코드도 변경하지 않음
 
-
+</br></br>
 # 7. 좋은 객체 지향 설계의 5가지 원칙의 적용
 - SRP, DIP, OCP 적용
   
@@ -1150,7 +1150,7 @@ public DiscountPolicy discountPolicy() {
 - AppConfig가 의존관계를 `FixDiscountPolicy` `RateDiscountPolicy` 로 변경해서 클라이언트 코드에 주입하므로 클라이언트 코드는 변경하지 않아도 됨
 **소프트웨어 요소를 새롭게 확장해도 사용 영역의 변경은 닫혀 있다!**
 
-
+</br></br>
 # 8. IoC, DI, 컨테이너 **중요**
 
 ## 제어의 역전 IoC
@@ -1192,7 +1192,7 @@ public DiscountPolicy discountPolicy() {
 - 또는 어샘블러, 오브젝트 팩토리 등으로 불리기도 한다.
 (DI 컨테이너는 조각들을 레고처럼 조립해주는 역할로 생각하면 된다.)
 
-
+</br></br>
 # 9. 스프링으로 전환하기
 - 지금까지 순수한 자바 코드만으로 DI(AppConfig)를 적용했다. 이제 스프링을 사용해보자.
 
@@ -1621,7 +1621,7 @@ static class SameBeanConfig {
 }
 }
 ```
-
+</br></br>
 # 5. 스프링 빈 조회 - 상속 관계
 
 - 부모 타입으로 조회하면, 자식 타입도 함께 조회한다.
@@ -1742,6 +1742,7 @@ public DiscountPolicy fixDiscountPolicy() {
 - BeanFactory를 직접 사용할 일은 거의 없다. 부가기능이 포함된 ApplicationContext를 사용한다.
 - BeanFactory나 ApplicationContext를 스프링 컨테이너라 한다.
 
+</br></br>
 # 7. 다양한 설정 형식 지원 - 자바 코드, XML
 
 - 스프링 컨테이너는 다양한 형식의 설정 정보를 받아드릴 수 있게 유연하게 설계되어 있다.
@@ -1808,6 +1809,7 @@ www.springframework.org/schema/beans/spring-beans.xsd">
 - xml 기반으로 설정하는 것은 최근에 잘 사용하지 않으므로 이정도로 마무리 하고, 필요하면 스프링 공식 레퍼런스 문서를 확인하자.
     - https://spring.io/projects/spring-framework
 
+</br></br>
 # 8. 스프링 빈 설정 메타 정보 - BeanDefinition
 - 스프링은 어떻게 이런 다양한 설정 형식을 지원하는 것일까? 그 중심에는 `BeanDefinition` 이라는 추상화가 있다.
 - 쉽게 이야기해서 **역할과 구현을 개념적으로 나눈 것**이다!
@@ -1876,6 +1878,7 @@ public class BeanDefinitionTest {
 
 # Chapter 5. 싱글톤 컨테이너
 
+</br></br>
 # 1. 웹 애플리케이션과 싱글톤
 - 스프링은 태생이 **기업용 온라인 서비스 기술**을 지원하기 위해 탄생했다.
 - 대부분의 스프링 애플리케이션은 웹 애플리케이션이다. 물론 웹이 아닌 애플리케이션 개발도 얼마든지 개발할 수 있다.
@@ -1994,6 +1997,7 @@ public void singletonServiceTest() {
 - 결론적으로 유연성이 떨어진다.
 - 안티패턴으로 불리기도 한다.
 
+</br></br>
 # 3. 싱글톤 컨테이너
 - 스프링 컨테이너는 싱글톤 패턴의 문제점을 해결하면서, 객체 인스턴스를 싱글톤(1개만 생성)으로 관리한다.
 - 지금까지 우리가 학습한 스프링 빈이 바로 싱글톤으로 관리되는 빈이다.
