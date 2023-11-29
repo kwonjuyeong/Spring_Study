@@ -3029,63 +3029,7 @@ this.memberRepository = memberRepository;
 - 필드 주입처럼 좀 편리하게 사용하는 방법은 없을까?
 - 역시 개발자는 귀찮은 것은 못 참는다! 다음 기본 코드를 최적화해보자.
 
-## 기본 코드
-```groovy
-@Component
-public class OrderServiceImpl implements OrderService {
-    private final MemberRepository memberRepository;
-    private final DiscountPolicy discountPolicy;
-
-    @Autowired
-    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
-        this.memberRepository = memberRepository;
-        this.discountPolicy = discountPolicy;
-    }
-}
-```
-
-생성자가 딱 1개만 있으면 `@Autowired` 를 생략할 수 있다.
-
-```groovy
-@Component
-public class OrderServiceImpl implements OrderService {
-    private final MemberRepository memberRepository;
-    private final DiscountPolicy discountPolicy;
-
-    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
-        this.memberRepository = memberRepository;
-        this.discountPolicy = discountPolicy;
-    }
-}
-```
-- 이제 롬복을 적용해보자. 롬복 라이브러리 적용 방법은 아래에 적어두었다.
-- 롬복 라이브러리가 제공하는 `@RequiredArgsConstructor` 기능을 사용하면 final이 붙은 필드를 모아서 생성자를 자동으로 만들어준다. (다음 코드에는 보이지 않지만 실제 호출 가능하다.)
-- 최종 결과는 다음과 같다! 정말 간결하지 않은가!
-
-## 최종 결과 코드
-```groovy
-@Component
-@RequiredArgsConstructor
-public class OrderServiceImpl implements OrderService {
-    private final MemberRepository memberRepository;
-    private final DiscountPolicy discountPolicy;
-}
-```
-- 이 최종결과 코드와 이전의 코드는 완전히 동일하다. 롬복이 자바의 애노테이션 프로세서라는 기능을 이용해서 컴파일시점에 생성자 코드를 자동으로 생성해준다.
-- 실제 `class` 를 열어보면 다음 코드가 추가되어 있는 것을 확인할 수 있다.
-
-```groovy
-public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
-    this.memberRepository = memberRepository;
-    this.discountPolicy = discountPolicy;
-}
-```
-
-## 정리
-최근에는 생성자를 딱 1개 두고, `@Autowired` 를 생략하는 방법을 주로 사용한다. 여기에 Lombok 라이브러리의
-`@RequiredArgsConstructor` 함께 사용하면 기능은 다 제공하면서, 코드는 깔끔하게 사용할 수 있다.
-
-
+</br></br>
 ## 롬복 라이브러리 적용 방법
 - build.gradle에 라이브러리 및 환경 추가
 ```groovy
@@ -3136,5 +3080,127 @@ test {
 3. 임의의 테스트 클래스를 만들고 @Getter, @Setter 확인
 
 
+
+## 기본 코드
+```groovy
+@Component
+public class OrderServiceImpl implements OrderService {
+    private final MemberRepository memberRepository;
+    private final DiscountPolicy discountPolicy;
+
+    @Autowired
+    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
+        this.memberRepository = memberRepository;
+        this.discountPolicy = discountPolicy;
+    }
+}
+```
+생성자가 딱 1개만 있으면 `@Autowired` 를 생략할 수 있다.
+
+
+```groovy
+@Component
+public class OrderServiceImpl implements OrderService {
+    private final MemberRepository memberRepository;
+    private final DiscountPolicy discountPolicy;
+
+    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
+        this.memberRepository = memberRepository;
+        this.discountPolicy = discountPolicy;
+    }
+}
+```
+- 이제 롬복을 적용해보자. 롬복 라이브러리 적용 방법은 아래에 적어두었다.
+- 롬복 라이브러리가 제공하는 `@RequiredArgsConstructor` 기능을 사용하면 final이 붙은 필드를 모아서 생성자를 자동으로 만들어준다. (다음 코드에는 보이지 않지만 실제 호출 가능하다.)
+- 최종 결과는 다음과 같다! 정말 간결하지 않은가!
+
+## 최종 결과 코드
+```groovy
+@Component
+@RequiredArgsConstructor
+public class OrderServiceImpl implements OrderService {
+    private final MemberRepository memberRepository;
+    private final DiscountPolicy discountPolicy;
+}
+```
+- 이 최종결과 코드와 이전의 코드는 완전히 동일하다. 롬복이 자바의 애노테이션 프로세서라는 기능을 이용해서 컴파일시점에 생성자 코드를 자동으로 생성해준다.
+- 실제 `class` 를 열어보면 다음 코드가 추가되어 있는 것을 확인할 수 있다.
+
+```groovy
+public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
+    this.memberRepository = memberRepository;
+    this.discountPolicy = discountPolicy;
+}
+```
+
+## 정리
+최근에는 생성자를 딱 1개 두고, `@Autowired` 를 생략하는 방법을 주로 사용한다. 여기에 Lombok 라이브러리의
+`@RequiredArgsConstructor` 함께 사용하면 기능은 다 제공하면서, 코드는 깔끔하게 사용할 수 있다.
+
 </br></br>
+# 5. 조회 빈이 2개 이상 - 문제
+
+
+**`@Autowired` 는 타입(Type)으로 조회한다.**
+``` groovy
+@Autowired
+private DiscountPolicy discountPolicy
+```
+
+타입으로 조회하기 때문에, 마치 다음 코드와 유사하게 동작한다. (실제로는 더 많은 기능을 제공한다.)
+`ac.getBean(DiscountPolicy.class)`
+
+
+스프링 빈 조회에서 학습했듯이 타입으로 조회하면 선택된 빈이 2개 이상일 때 문제가 발생한다.
+`DiscountPolicy` 의 하위 타입인 `FixDiscountPolicy` , `RateDiscountPolicy` 둘다 스프링 빈으로 선언해보자.
+```groovy
+@Component
+public class FixDiscountPolicy implements DiscountPolicy {}
+```
+
+```groovy
+@Component
+public class RateDiscountPolicy implements DiscountPolicy {}
+```
+
+그리고 이렇게 의존관계 자동 주입을 실행하면
+```groovy
+@Autowired
+private DiscountPolicy discountPolicy
+```
+
+
+`NoUniqueBeanDefinitionException` 오류가 발생한다.
+```groovy
+NoUniqueBeanDefinitionException: No qualifying bean of type
+'hello.core.discount.DiscountPolicy' available: expected single matching bean
+but found 2: fixDiscountPolicy,rateDiscountPolicy
+```
+
+오류메시지가 친절하게도 하나의 빈을 기대했는데 `fixDiscountPolicy` , `rateDiscountPolicy` 2개가 발견되었다고 알려준다.
+
+
+이때 하위 타입으로 지정할 수 도 있지만, 하위 타입으로 지정하는 것은 DIP를 위배하고 유연성이 떨어진다. 그리고 이
+름만 다르고, 완전히 똑같은 타입의 스프링 빈이 2개 있을 때 해결이 안된다.
+스프링 빈을 수동 등록해서 문제를 해결해도 되지만, 의존 관계 자동 주입에서 해결하는 여러 방법이 있다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
