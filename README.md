@@ -3449,26 +3449,26 @@ public int discount(Member member, int price, String discountCode) {
 - 설정 정보를 기반으로 애플리케이션을 구성하는 부분과 실제 동작하는 부분을 명확하게 나누는 것이 이상적이지만, 개발자 입장에서 스프링 빈을 하나 등록할 때 `@Component` 만 넣어주면 끝나는 일을 `@Configuration` 설정 정보에 가서 `@Bean` 을 적고, 객체를 생성하고, 주입할 대상을 일일이 적어주는 과정은 상당히 번거롭다.
 
 - 또 관리할 빈이 많아서 설정 정보가 커지면 설정 정보를 관리하는 것 자체가 부담이 된다.그리고 결정적으로 자동 빈 등록을 사용해도 OCP, DIP를 지킬 수 있다.
-
+</br></br>
 **그러면 수동 빈 등록은 언제 사용하면 좋을까?**
-
+</br></br>
 애플리케이션은 크게 업무 로직과 기술 지원 로직으로 나눌 수 있다.
 - **업무 로직 빈:** 웹을 지원하는 컨트롤러, 핵심 비즈니스 로직이 있는 서비스, 데이터 계층의 로직을 처리하는 리포지토리등이 모두 업무 로직이다. 보통 비즈니스 요구사항을 개발할 때 추가되거나 변경된다.
 -  **기술 지원 빈:** 기술적인 문제나 공통 관심사(AOP)를 처리할 때 주로 사용된다. 데이터베이스 연결이나, 공통 로그 처리 처럼 업무 로직을 지원하기 위한 하부 기술이나 공통 기술들이다.
 - 업무 로직은 숫자도 매우 많고, 한번 개발해야 하면 컨트롤러, 서비스, 리포지토리 처럼 어느정도 유사한 패턴이있다. 이런 경우 자동 기능을 적극 사용하는 것이 좋다. 보통 문제가 발생해도 어떤 곳에서 문제가 발생했는지 명확하게 파악하기 쉽다.
 - 기술 지원 로직은 업무 로직과 비교해서 그 수가 매우 적고, 보통 애플리케이션 전반에 걸쳐서 광범위하게 영향을미친다. 그리고 업무 로직은 문제가 발생했을 때 어디가 문제인지 명확하게 잘 드러나지만, 기술 지원 로직은 적용이 잘 되고 있는지 아닌지 조차 파악하기 어려운 경우가 많다. 그래서 이런 기술 지원 로직들은 가급적 수동 빈 등록을 사용해서 명확하게 드러내는 것이 좋다.
-
+</br></br>
 **애플리케이션에 광범위하게 영향을 미치는 기술 지원 객체는 수동 빈으로 등록해서 딱! 설정 정보에 바로 나타나게 하는
 것이 유지보수 하기 좋다.**
-
+</br></br>
 **비즈니스 로직 중에서 다형성을 적극 활용할 때**
 의존관계 자동 주입 - 조회한 빈이 모두 필요할 때, List, Map을 다시 보자.
 `DiscountService` 가 의존관계 자동 주입으로 `Map<String, DiscountPolicy>` 에 주입을 받는 상황을 생각해보자. 여기에 어떤 빈들이 주입될 지, 각 빈들의 이름은 무엇일지 코드만 보고 한번에 쉽게 파악할 수 있을까? 내가 개발했으니 크게 관계가 없지만, 만약 이 코드를 다른 개발자가 개발해서 나에게 준 것이라면 어떨까?
-
+</br></br>
 자동 등록을 사용하고 있기 때문에 파악하려면 여러 코드를 찾아봐야 한다.
 이런 경우 수동 빈으로 등록하거나 또는 자동으로하면 **특정 패키지에 같이 묶어**두는게 좋다! 핵심은 딱 보고 이해가 되어야 한다!
 
-
+</br></br>
 이 부분을 별도의 설정 정보로 만들고 수동으로 등록하면 다음과 같다.
 ```java
 @Configuration
@@ -3485,7 +3485,6 @@ return new FixDiscountPolicy();
 ```
 이 설정 정보만 봐도 한눈에 빈의 이름은 물론이고, 어떤 빈들이 주입될지 파악할 수 있다. 그래도 빈 자동 등록을 사용하고 싶으면 파악하기 좋게 `DiscountPolicy` 의 구현 빈들만 따로 모아서 특정 패키지에 모아두자.
 
-
 참고로 **스프링과 스프링 부트가 자동으로 등록하는 수 많은 빈들은 예외**다. 이런 부분들은 스프링 자체를 잘 이해하고
 스프링의 의도대로 잘 사용하는게 중요하다. 스프링 부트의 경우 `DataSource` 같은 데이터베이스 연결에 사용하는 기
 술 지원 로직까지 내부에서 자동으로 등록하는데, 이런 부분은 메뉴얼을 잘 참고해서 스프링 부트가 의도한 대로 편리하
@@ -3498,6 +3497,200 @@ return new FixDiscountPolicy();
 직접 등록하는 기술 지원 객체는 수동 등록
 다형성을 적극 활용하는 비즈니스 로직은 수동 등록을 고민해보자
 
+</br></br>
+# Chapter 7. 빈 생명주기 콜백
+
+# 1. 빈 생명주기 콜백 시작
+
+데이터베이스 커넥션 풀이나, 네트워크 소켓처럼 애플리케이션 시작 시점에 필요한 연결을 미리 해두고, 애플리케이션종료 시점에 연결을 모두 종료하는 작업을 진행하려면, 객체의 초기화와 종료 작업이 필요하다.
+스프링을 통해 이러한 초기화 작업과 종료 작업을 어떻게 진행하는지 예제로 알아보자.
+</br></br>
+간단하게 외부 네트워크에 미리 연결하는 객체를 하나 생성한다고 가정해보자. 실제로 네트워크에 연결하는 것은 아니
+고, 단순히 문자만 출력하도록 했다. 이 `NetworkClient` 는 애플리케이션 시작 시점에 `connect()` 를 호출해서 연
+결을 맺어두어야 하고, 애플리케이션이 종료되면 `disConnect()` 를 호출해서 연결을 끊어야 한다.
+
+
+### 예제 코드, 테스트 하위 생성
+
+```groovy
+package hello.core.lifecycle;
+
+public class NetworkClient {
+
+    private String url;
+
+    public NetworkClient() {
+        System.out.println("생성자 호출, url = " + url);
+        connect();
+        call("초기화 연결 메시지");
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    //서비스 시작시 호출
+    public void connect() {
+        System.out.println("connect: " + url);
+    }
+
+    public void call(String message) {
+        System.out.println("call: " + url + " message = " + message);
+    }
+
+    //서비스 종료시 호출
+    public void disconnect() {
+        System.out.println("close: " + url);
+    }
+}
+```
+### 스프링 환경설정과 실행
+```groovy
+package hello.core.lifecycle;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+public class BeanLifeCycleTest {
+
+@Test
+public void lifeCycleTest() {
+    ConfigurableApplicationContext ac = new AnnotationConfigApplicationContext(LifeCycleConfig.class);
+    NetworkClient client = ac.getBean(NetworkClient.class);
+    ac.close(); //스프링 컨테이너를 종료, ConfigurableApplicationContext 필요
+}
+
+@Configuration
+static class LifeCycleConfig {
+    @Bean
+    public NetworkClient networkClient() {
+        NetworkClient networkClient = new NetworkClient();
+        networkClient.setUrl("http://hello-spring.dev");
+        return networkClient;
+        }
+    }
+}
+```
+
+### 실행해보면 다음과 같은 이상한 결과가 나온다.
+```xml
+생성자 호출, url = null
+connect: null
+call: null message = 초기화 연결 메시지
+```
+생성자 부분을 보면 url 정보 없이 connect가 호출되는 것을 확인할 수 있다.
+너무 당연한 이야기이지만 객체를 생성하는 단계에는 url이 없고, 객체를 생성한 다음에 외부에서 수정자 주입을 통해서 `setUrl()` 이 호출되어야 url이 존재하게 된다.
+
+### 스프링 빈은 간단하게 다음과 같은 라이프사이클을 가진다.
+- **객체 생성** => **의존관계 주입**
+</br></br>
+
+스프링 빈은 객체를 생성하고, 의존관계 주입이 다 끝난 다음에야 필요한 데이터를 사용할 수 있는 준비가 완료된다. 따라서 초기화 작업은 의존관계 주입이 모두 완료되고 난 다음에 호출해야 한다. 그런데 개발자가 의존관계 주입이 모두 완료된 시점을 어떻게 알 수 있을까?
+
+**스프링은 의존관계 주입이 완료되면 스프링 빈에게 콜백 메서드를 통해서 초기화 시점을 알려주는 다양한 기능을 제공**한다. 또한 **스프링은 스프링 컨테이너가 종료되기 직전에 소멸 콜백**을 준다. 따라서 안전하게 종료 작업을 진행할 수 있다.
+
+</br></br>
+
+### 스프링 빈의 이벤트 라이프사이클**
+**스프링 컨테이너 생성** => **스프링 빈 생성** => **의존관계 주입** => **초기화 콜백** => **사용** => **소멸전 콜백** => **스프링 종료**
+</br></br>
+- **초기화 콜백**: 빈이 생성되고, 빈의 의존관계 주입이 완료된 후 호출
+- **소멸전 콜백**: 빈이 소멸되기 직전에 호출
+스프링은 다양한 방식으로 생명주기 콜백을 지원한다.
+
+
+**참고: 객체의 생성과 초기화를 분리하자.**
+생성자는 필수 정보(파라미터)를 받고, 메모리를 할당해서 객체를 생성하는 책임을 가진다. 반면에 초기화는 이렇게 생성된 값들을 활용해서 외부 커넥션을 연결하는등 무거운 동작을 수행한다. 따라서 생성자 안에서 무거운 초기화 작업을 함께 하는 것 보다는 객체를 생성하는 부분과 초기화 하는 부분을 명확하게 나누는 것이 유지보수 관점에서 좋다. 물론 초기화 작업이 내부 값들만 약간 변경하는 정도로 단순한 경우에는 생성자에서 한번에 다 처리하는게 더 나을 수 있다.
+
+
+**참고:** 싱글톤 빈들은 스프링 컨테이너가 종료될 때 싱글톤 빈들도 함께 종료되기 때문에 스프링 컨테이너가 종료되기 직전에 소멸전 콜백이 일어난다. 뒤에서 설명하겠지만 싱글톤 처럼 컨테이너의 시작과 종료까지 생존하는 빈도 있지만, 생명주기가 짧은 빈들도 있는데 이 빈들은 컨테이너와 무관하게 해당 빈이 종료되기 직전에 소멸전 콜백이 일어난다. 자세한 내용은 스코프에서 알아보겠다.
+
+## 스프링은 크게 3가지 방법으로 빈 생명주기 콜백을 지원한다.**
+- 인터페이스(InitializingBean, DisposableBean)
+- 설정 정보에 초기화 메서드, 종료 메서드 지정
+- @PostConstruct, @PreDestroy 애노테이션 지원
+
+</br></br>
+# 2. 인터페이스 InitializingBean, DisposableBean
+
+## 코드
+
+```groovy
+package hello.core.lifecycle;
+
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+
+public class NetworkClient implements InitializingBean, DisposableBean {
+
+    private String url;
+
+    public NetworkClient() {
+        System.out.println("생성자 호출, url = " + url);
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    //서비스 시작시 호출
+    public void connect() {
+        System.out.println("connect: " + url);
+    }
+
+    public void call(String message) {
+        System.out.println("call: " + url + " message = " + message);
+    }
+
+    //서비스 종료시 호출
+    public void disConnect() {
+        System.out.println("close + " + url);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        connect();
+        call("초기화 연결 메시지");
+    }
+    @Override
+    public void destroy() throws Exception {
+        disConnect();
+    }
+}
+```
+- `InitializingBean` 은 `afterPropertiesSet()` 메서드로 초기화를 지원한다.
+- `DisposableBean` 은 `destroy()` 메서드로 소멸을 지원한다.
+
+### **출력 결과**
+```xml
+생성자 호출, url = null
+NetworkClient.afterPropertiesSet
+connect: http://hello-spring.dev
+call: http://hello-spring.dev message = 초기화 연결 메시지
+13:24:49.043 [main] DEBUG
+org.springframework.context.annotation.AnnotationConfigApplicationContext -
+Closing NetworkClient.destroy
+close + http://hello-spring.dev
+```
+- 출력 결과를 보면 초기화 메서드가 주입 완료 후에 적절하게 호출 된 것을 확인할 수 있다.
+- 그리고 스프링 컨테이너의 종료가 호출되자 소멸 메서드가 호출 된 것도 확인할 수 있다.
+
+
+### 초기화, 소멸 인터페이스 단점**
+- 이 인터페이스는 스프링 전용 인터페이스다. 해당 코드가 스프링 전용 인터페이스에 의존한다.
+- 초기화, 소멸 메서드의 이름을 변경할 수 없다.
+- 내가 코드를 고칠 수 없는 외부 라이브러리에 적용할 수 없다.
+  
+**참고:** 인터페이스를 사용하는 초기화, 종료 방법은 스프링 초창기에 나온 방법들이고, 지금은 다음의 더 나은 방법들이 있어서 거의 사용하지 않는다.
+
+</br></br>
+# 3. 빈 등록 초기화, 소멸 메서드 지정
+설정 정보에 `@Bean(initMethod = "init", destroyMethod = "close")` 처럼 초기화, 소멸 메서드를 지정할 수 있다.
+
+## 설정 정보를 사용하도록 변경
 
 
 
