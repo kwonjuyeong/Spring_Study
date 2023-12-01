@@ -16,7 +16,6 @@ public class AutowiredTest {
 
         ApplicationContext ac = new AnnotationConfigApplicationContext(TestBean.class);
 
-
     }
 
     static class TestBean{
