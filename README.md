@@ -4705,7 +4705,7 @@ public class LogDemoService {
 실행해보면 잘 동작하는 것을 확인할 수 있다.
 코드를 잘 보면 `LogDemoController` , `LogDemoService` 는 Provider 사용 전과 완전히 동일하다. 어떻게 된 것 일까?
 
-
+</br></br>
 # 9. 웹 스코프와 프록시 동작 원리
 먼저 주입된 myLogger를 확인해보자.
 
